@@ -1,0 +1,9 @@
+setup.py
+src/__init__.py
+src/main.py
+src/subpackage/__init__.py
+src/subpackage/submodule.py
+trade5.egg-info/PKG-INFO
+trade5.egg-info/SOURCES.txt
+trade5.egg-info/dependency_links.txt
+trade5.egg-info/top_level.txt
