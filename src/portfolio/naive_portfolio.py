@@ -1,8 +1,8 @@
-import src.event
-from src.portfolio import portfolio
+from src import event
+from src.portfolio import abstract_portfolio
 
 
-class NaivePortfolio(portfolio.Portfolio):
+class NaivePortfolio(abstract_portfolio.Portfolio):
     """
     just buys and sells 1000 units of the ticker, with no 
     order sizing, or risk management.

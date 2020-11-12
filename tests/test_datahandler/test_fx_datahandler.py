@@ -46,5 +46,6 @@ def test_update_data():
     old_length = len(fx.get_latest_data()['EUR_USD'])
     fx.update()
     assert len(fx.get_latest_data()['EUR_USD']) == old_length+1, f'update should increase length of latest_data by only one'
-    fx.update()
     assert not fx.get_data()['EUR_USD'], f'data should be empty, but is {fx.get_data()} after 2 calls to update data with k=4 and old data {old_data}'
+    with pytest.raises(IndexError):
+        fx.update()

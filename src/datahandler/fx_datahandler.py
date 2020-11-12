@@ -59,8 +59,7 @@ class FxDataHandler(abstract_datahandler.DataHandler):
         """ Remove the next earliest point from data and append it to latest_data. """
         if self.data:
             for ticker in self.tickers:
-                if self.data[ticker]:
-                    self.latest_data[ticker].append(self.data[ticker].popleft())
+                self.latest_data[ticker].append(self.data[ticker].popleft())
 
     # utility functions
     def _get_candles(self, ticker):
