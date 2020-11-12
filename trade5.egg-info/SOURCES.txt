@@ -1,8 +1,12 @@
 setup.py
 src/__init__.py
-src/main.py
-src/subpackage/__init__.py
-src/subpackage/submodule.py
+src/backtest.py
+src/event.py
+src/datahandler/__init__.py
+src/datahandler/abstract_datahandler.py
+src/datahandler/fx_datahandler.py
+src/portfolio/__init__.py
+src/portfolio/abstract_portfolio.py
 trade5.egg-info/PKG-INFO
 trade5.egg-info/SOURCES.txt
 trade5.egg-info/dependency_links.txt
