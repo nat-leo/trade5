@@ -38,7 +38,8 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             ticker=q_event.get_ticker(), 
             quantity=q_event.get_quantity(),
             price=price,
-            pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity())
+            pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity()),
+            margin=self.convert_to_usd(q_event.get_ticker(), q_event.get_quantity())
         ))
     
     def update_conversion(self, q_event):

@@ -1,6 +1,8 @@
 from collections import deque
-import pandas as pd 
 import datetime
+
+import plotly.graph_objects as go
+import pandas as pd 
 
 from src.datahandler import fx_datahandler
 from src.portfolio import naive_portfolio
@@ -49,6 +51,6 @@ while True:
         print(df)
         print('win ratio', len([x for x in x if x > 0]) / len(x))
         print(df.describe())
-        #plt.hist(x, bins=75)
-        #plt.show()
+        fig = go.Figure(data=go.Scatter(y=port.get_equity()))
+        fig.show()
         break

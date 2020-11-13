@@ -39,6 +39,8 @@ class NaivePortfolio(abstract_portfolio.Portfolio):
                     'ticker': ticker, 
                     'return': trade_return
                 })
+                last_equity = self.equity[-1]
+                self.equity.append(q_event.get_pip_val()*trade_return + last_equity)
                 self.holdings.pop(ticker)
         else:
             self.holdings[ticker] = {
@@ -50,6 +52,9 @@ class NaivePortfolio(abstract_portfolio.Portfolio):
 
     def get_returns(self):
         return self.history
+
+    def get_equity(self):
+        return self.equity
     
     # helpers
     def _is_long(self, ticker):

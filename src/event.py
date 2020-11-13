@@ -106,13 +106,14 @@ class FillEvent(Event):
     price - price at which the units were filled.
     commission - cost of getting a fill.
     """
-    def __init__(self, direction, ticker, quantity, price, pip_val):
+    def __init__(self, direction, ticker, quantity, price, pip_val, margin):
         self.type = 'FILL'
         self.ticker = ticker
         self.quantity = int(quantity)
         self.price = float(price)
         self.direction = direction
         self.pip_val = pip_val
+        self.margin = margin
     
     def get_type(self):
         return self.type
@@ -131,3 +132,6 @@ class FillEvent(Event):
     
     def get_pip_val(self):
         return self.pip_val
+    
+    def get_margin(self):
+        return self.margin
