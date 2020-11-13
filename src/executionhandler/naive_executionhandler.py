@@ -37,31 +37,75 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             ticker=q_event.get_ticker(), 
             quantity=q_event.get_quantity(),
             price=q_event.get_datetime()['bid'][3] if q_event.get_direction() < 0 else q_event.get_datetime()['ask'][3],
-            pip_val=self.calculate_pip_val(q_event)
+            pip_val=None
         ))
     
     def update_conversion(self, q_event):
         """updates conversion table with a MarketEvent."""
-        ticker = q_event.get_ticker()
-        new_conversion = q_event.get_data()[-1]
-        if ticker in self.conversions:
-            self.conversions[ticker] = new_conversion
-        #print('conversion table:', self.conversions)
+        pass
     
-    def calculate_pip_val(self, q_event):
-        """ uses OrderEvent and conversion table to calculate USD per pip."""
-        if q_event.get_direction() < 0:
-            b_a = 'bid'
+    def calculate_pip_val(self, ticker, rate, value):
+        """ Calculate pip value from any amount.
+
+        use the formula:
+
+        pip_val of currency = units of currency * 0.0001 / price of pair
+                                                  0.01 / price of pair for /JPY pairs
+
+        Example:
+        ABC/CDE = 1.5
+        ABC is the base currency, and CDE is the quoted currency.
+
+        if you buy 100 units of ABC/CDE, you get a pip value:
+        pip_val = 100 * 0.00001/1.5 = 0.00666 ABC per pip
+        """
+        if ticker.startswith('JPY') or ticker.endswith('JPY'):
+            return value * 0.01/rate
         else:
-            b_a = 'ask'
-        base_currency_pips =  q_event.get_quantity() * (0.0001/q_event.get_datetime()[b_a][3])
-        base = q_event.get_ticker()[:3]
-        conversion = 0
-        for ticker in self.conversions:
-            if ticker.startswith(base):
-                pip_val = base_currency_pips * self.conversions[ticker][b_a][3]
-            elif ticker.endswith(base):
-                pip_val = base_currency_pips / self.conversions[ticker][b_a][3]
-            else:
-                print('ticker not found for', ticker)
-        return pip_val
+            return value * 0.0001/rate
+    
+    def convert_to_usd(self, ticker, value):
+        """Take any non-USD amount and convert it to USD, can be any either 
+        the foreign currency, or the foreign currency per pip (where the pip value 
+        already accounts for the order size).
+        
+        Example: 
+        ABC/CDE = 1.5
+        ABC/LHF = 0.75
+        ABC is the base currency, CDE is the quoted currency, 
+        When you buy 100 units of ABC/CDE, you get a trade value of 100 ABC.
+        If your account currency is LHF, you convert 100 ABC -> LHF to get your
+        trade value in LHF.
+
+        ABC * (LHF/ABC) = LHF
+        ABC/LHF = 0.75 -> LHF/ABC = 1 / 0.75
+        100 ABC * 1/0.75 LHF/ABC = 133.33333 LHF
+
+        LHF * (ABC/LHF) = ABC
+        100LHF * 0.75 ABC/LHF =  75 ABC
+        """
+        if ticker[:3] == 'USD':
+            return value
+        try:
+            rate = self.conversions[ticker[:3]+'_USD']
+            return value * rate
+        except KeyError:
+            rate = self.conversions['USD_'+ticker[:3]]
+            return value * 1/rate 
+
+    # getters and setters
+    def get_events(self):
+        return self.events
+
+    def get_all_conversions(self):
+        return self.conversions
+    
+    def get_conversion(self, ticker):
+        if ticker in self.conversions:
+            return self.conversions[ticker]
+        else:
+            return 'Conversion rate not found.'
+    
+    def set_conversion(self, pair, rate):
+        assert pair in self.conversions, f'pair {pair} not found in conversions'
+        self.conversions[pair] = rate

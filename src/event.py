@@ -18,6 +18,7 @@ class MarketEvent(Event):
         return self.type
     
     def get_data(self):
+        """ [{'time': date, 'volume': int or float, 'bid': [float, float, float, float], 'ask': [float, float, float, float]}]."""
         return self.data
 
     def get_ticker(self):

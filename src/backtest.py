@@ -18,7 +18,7 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
            "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
 queue = deque()
-bars = fx_datahandler.FxDataHandler(queue, ['EUR_USD'], "D", datetime.datetime(2019, 1, 1), K=100)
+bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2019, 1, 1), K=100)
 port = naive_portfolio.NaivePortfolio(queue, 1000)
 strat = linear_regression_strategy.NaiveLinearRegression(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)
