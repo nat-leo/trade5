@@ -8,42 +8,52 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
     def __init__(self, events):
         self.events = events
         self.conversions = {
-            "AUD_USD": float,
-            "EUR_USD": float,
-            "GBP_USD": float,
-            "NZD_USD": float,
-            "USD_CAD": float,
-            "USD_CHF": float,
-            "USD_CNH": float,
-            "USD_CZK": float,
-            "USD_DKK": float,
-            "USD_HKD": float,
-            "USD_HUF": float,
-            "USD_JPY": float,
-            "USD_MXN": float,
-            "USD_NOK": float,
-            "USD_PLN": float,
-            "USD_SAR": float,
-            "USD_SEK": float,
-            "USD_SGD": float,
-            "USD_THB": float,
-            "USD_TRY": float,
-            "USD_ZAR": float,
+            "AUD_USD": {},
+            "EUR_USD": {},
+            "GBP_USD": {},
+            "NZD_USD": {},
+            "USD_CAD": {},
+            "USD_CHF": {},
+            "USD_CNH": {},
+            "USD_CZK": {},
+            "USD_DKK": {},
+            "USD_HKD": {},
+            "USD_HUF": {},
+            "USD_JPY": {},
+            "USD_MXN": {},
+            "USD_NOK": {},
+            "USD_PLN": {},
+            "USD_SAR": {},
+            "USD_SEK": {},
+            "USD_SGD": {},
+            "USD_THB": {},
+            "USD_ZAR": {},
+            "USD_TRY": {},
         }
 
     def fill_order(self, q_event):
+        price = q_event.get_datetime()['bid'][3] if q_event.get_direction() < 0 else q_event.get_datetime()['ask'][3]
         self.events.append(event.FillEvent(
             direction=q_event.get_direction(), 
             ticker=q_event.get_ticker(), 
             quantity=q_event.get_quantity(),
-            price=q_event.get_datetime()['bid'][3] if q_event.get_direction() < 0 else q_event.get_datetime()['ask'][3],
-            pip_val=None
+            price=price,
+            pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity())
         ))
     
     def update_conversion(self, q_event):
         """updates conversion table with a MarketEvent."""
-        pass
-    
+        if q_event.get_ticker() in self.conversions:
+            midpoint = (q_event.get_data()[-1]['bid'][3] + q_event.get_data()[-1]['ask'][3]) / 2
+            self.conversions[q_event.get_ticker()] = midpoint
+
+    def set_pip_value(self, ticker, rate, value):
+        """called on an OrderEvent"""
+        pip_val = self.calculate_pip_val(ticker, rate, value)
+        pip_val_in_usd = self.convert_to_usd(ticker, pip_val)
+        return pip_val_in_usd
+
+    # helpers
     def calculate_pip_val(self, ticker, rate, value):
         """ Calculate pip value from any amount.
 

@@ -31,3 +31,7 @@ def test_convert_to_usd(broker):
     broker.set_conversion("USD_SEK", 8.64145)
     assert 999.99 < broker.convert_to_usd("USD_SEK", 1000) < 1000.01, f'calculation does not equal conversion'
     
+def test_set_pip_val(broker):
+    broker.set_conversion("EUR_USD", 1.18189)
+    assert 0.10 < broker.set_pip_value("EUR_CHF", 1.08094, 1000) < 0.12, f'calculation does not equal conversion'
+    assert 0.12 < broker.set_pip_value("EUR_GBP", 0.89830, 1000) < 0.14, f'calculation does not equal conversion'
