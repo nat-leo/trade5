@@ -64,12 +64,13 @@ class OrderEvent(Event):
     datetime - datetime the event was created.
     quantity - nonnegative integer of the amount of units to buy/sell.
     """
-    def __init__(self, direction, datetime, ticker, quantity, stop_loss=None, take_profit=None):
+    def __init__(self, direction, datetime, ticker, quantity, price=None, stop_loss=None, take_profit=None):
         self.type = 'ORDER'
         self.ticker = ticker
         self.quantity = quantity
         self.direction = direction
         self.datetime = datetime
+        self.price = price
         self.stop_loss = stop_loss
         self.take_profit = take_profit
     
@@ -87,6 +88,9 @@ class OrderEvent(Event):
     
     def get_datetime(self):
         return self.datetime
+    
+    def get_price(self):
+        return self.price
 
     def get_stop_loss(self):
         return self.stop_loss

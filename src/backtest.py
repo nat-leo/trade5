@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pandas as pd 
 
 from src.datahandler import fx_datahandler
-from src.portfolio import naive_portfolio
+from src.portfolio import naive_portfolio, sl_tp_portfolio
 from src.strategy import linear_regression_strategy
 from src.executionhandler import naive_executionhandler
 
@@ -21,7 +21,8 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
 
 queue = deque()
 bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2019, 1, 1), K=100)
-port = naive_portfolio.NaivePortfolio(queue, 1000)
+#port = naive_portfolio.NaivePortfolio(queue, 1000)
+port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
 strat = linear_regression_strategy.NaiveLinearRegression(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)
 
@@ -45,7 +46,7 @@ while True:
     try:
         bars.update()
     except IndexError: # error should be IndexError: pop from empty list
-        returns = port.get_returns()
+        returns = port.get_history()
         x = [r['return'] for r in returns]
         df = pd.DataFrame({'return': x})
         print(df)

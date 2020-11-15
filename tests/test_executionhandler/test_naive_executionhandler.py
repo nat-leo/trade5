@@ -37,5 +37,5 @@ def test_set_pip_val(broker):
     assert 0.12 < broker.set_pip_value("EUR_GBP", 0.89830, 1000) < 0.14, f'calculation does not equal conversion'
     broker.set_conversion("GBP_USD", 1.31811)
     assert 0.06 < broker.set_pip_value("GBP_USD", 1.81412, 1000) < 0.08
-    broker.set_conversion("USD_JPY", 104.622)
-    assert 0.9 < broker.set_pip_value("SGD_JPY", 77.634, 1000) < 0.1
+    broker.set_conversion("USD_SGD", 1.34659)
+    assert 0.09 < broker.set_pip_value("SGD_JPY", 77.552, 1000) < 0.11

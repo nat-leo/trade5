@@ -36,7 +36,7 @@ class NaivePortfolio(abstract_portfolio.Portfolio):
                 trade_return = old_price - new_price
             if new_direction != old_direction:
                 self.history.append({
-                    'ticker': ticker, 
+                    'ticker': ticker,
                     'return': trade_return
                 })
                 last_equity = self.equity[-1]
