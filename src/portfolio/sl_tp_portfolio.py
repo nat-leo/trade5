@@ -55,8 +55,8 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
                 'price': q_event.get_price(),
                 'pip_value': q_event.get_pip_val(),
                 'margin': q_event.get_margin(),
-                'stop_loss': self.set_stop_loss(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 20),
-                'take_profit': self.set_take_profit(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 20)
+                'stop_loss': self.set_stop_loss(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 200),
+                'take_profit': self.set_take_profit(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 500)
             }
 
     def check_if_close_triggered(self, q_event):
@@ -80,17 +80,6 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
                 self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
             elif ask[1] < self.holdings[tick]['take_profit']:
                 self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
-
-    #utility functions
-    def is_sl_hit(self, price, sl):
-        if price < sl:
-            return True
-        return False
-    
-    def is_tp_hit(self, price, tp):
-        if price > tp:
-            return True
-        return False
 
     # utility functions
     def set_stop_loss(self, ticker, direction, price, pips):

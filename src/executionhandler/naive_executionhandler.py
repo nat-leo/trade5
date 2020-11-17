@@ -44,9 +44,15 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
     
     def update_conversion(self, q_event):
         """updates conversion table with a MarketEvent."""
-        if q_event.get_ticker() in self.conversions:
-            midpoint = (q_event.get_data()[-1]['bid'][3] + q_event.get_data()[-1]['ask'][3]) / 2
-            self.conversions[q_event.get_ticker()] = midpoint
+        if isinstance(q_event, event.MarketEvent): # handle if MarketEvent
+            if q_event.get_ticker() in self.conversions:
+                midpoint = (q_event.get_data()[-1]['bid'][3] + q_event.get_data()[-1]['ask'][3]) / 2
+                self.conversions[q_event.get_ticker()] = midpoint
+        elif isinstance(q_event, event.MultipleMarketEvent): # handle if MultipleMarketEvent
+            for mkt_event in q_event.get_market_events():
+                if mkt_event.get_ticker() in self.conversions:
+                    midpoint = (mkt_event.get_data()[-1]['bid'][3] + mkt_event.get_data()[-1]['ask'][3]) / 2
+                    self.conversions[mkt_event.get_ticker()] = midpoint
 
     def set_pip_value(self, ticker, rate, value):
         """called on an OrderEvent"""

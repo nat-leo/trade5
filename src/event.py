@@ -25,6 +25,26 @@ class MarketEvent(Event):
         return self.ticker
 
 
+class MultipleMarketEvent(Event):
+    """
+    data or news that comes into the market.
+    """
+    def __init__(self, market_objects):
+        self.type = 'MARKET'
+        self.market_objects = market_objects
+        for obj in self.market_objects:
+            assert isinstance(obj, MarketEvent)
+
+    def __repr__(self):
+        return "MarketEvent beginning at" + self.market_objects[0].get_data()[0]['time']
+    
+    def get_type(self):
+        return self.type
+    
+    def get_market_events(self):
+        return self.market_objects
+    
+
 class SignalEvent(Event):
     """
     Strategy objects send signals to Portfolio objects.
@@ -101,7 +121,7 @@ class OrderEvent(Event):
 
 class FillEvent(Event):
     """
-    FillEvent objects are responses to order objects - they calculate commission,
+    FillEvent objects are responses to order objects
 
     Parameters:
     ticker - ticker symbol of security.
@@ -139,3 +159,4 @@ class FillEvent(Event):
     
     def get_margin(self):
         return self.margin
+    
