@@ -20,6 +20,7 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
             ticker=q_event.get_ticker(), 
             quantity=1000
         ))
+        print('portfolio created an order')
     
     def create_close_order(self, ticker, direction, datetime, price, quantity=1000):
         """For takeprofit / stoploss caused OrderEvents. """
@@ -47,6 +48,7 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
             })
             self.equity.append(self.equity[-1] + self.calculate_return(holding['ticker'], holding['direction'], holding['price'], q_event.get_price(), holding['pip_value']))
             del self.holdings[q_event.get_ticker()]
+            print('portfolio added a trade entry')
         else: # add order to holdings
             self.holdings[q_event.get_ticker()] = {
                 'ticker': q_event.get_ticker(),
@@ -58,6 +60,7 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
                 'stop_loss': self.set_stop_loss(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 200),
                 'take_profit': self.set_take_profit(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 500)
             }
+            print('portfolio updated holdings')
 
     def check_if_close_triggered(self, q_event):
         """Takes a MarketEvent and checks if the candle would have triggered one of the 

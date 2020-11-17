@@ -19,13 +19,17 @@ class DualMomentum(abstract_strategy.Strategy):
         for mkt_event in q_event.get_market_events():
             pair_performances[mkt_event.get_ticker()] = self.calculate_percent_change(mkt_event.get_data()[-1]['bid'][3], 
                                                                                       mkt_event.get_data()[0]['bid'][3])
-        ticker = max(pair_performances)
-        direction = -1 if pair_performances[max(pair_performances)] < 0 else 1
+        sorted_performances = [{'ticker': k, 'performance': v} for k, v in sorted(pair_performances.items(), key=lambda item: item[1])]
+        ticker = sorted_performances[-1]['ticker']
         for mkt_event in q_event.get_market_events():
             if ticker == mkt_event.get_ticker():
                 tick_event = mkt_event
         print(ticker, pair_performances[ticker])
-        self.events.append(event.SignalEvent(ticker, direction, tick_event.get_data()[-1]))
+        print('performances:')
+        for value in sorted_performances:
+            print(value)
+        self.events.append(event.SignalEvent(sorted_performances[-1]['ticker'], 1, tick_event.get_data()[-1]))
+        return pair_performances
 
     # utility functions
     def calculate_percent_change(self, new_price, old_price):

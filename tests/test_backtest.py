@@ -21,7 +21,7 @@ def test_backtest():
             "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
     queue = deque()
-    bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2019, 1, 1), K=50)
+    bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2020, 11, 14), K=2)
     #port = naive_portfolio.NaivePortfolio(queue, 1000)
     port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
     #strat = linear_regression_strategy.NaiveLinearRegression(queue)

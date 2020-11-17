@@ -41,6 +41,7 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity()),
             margin=self.convert_to_usd(q_event.get_ticker(), q_event.get_quantity())
         ))
+        print(f'execution filled order for {q_event.get_ticker()}')
     
     def update_conversion(self, q_event):
         """updates conversion table with a MarketEvent."""

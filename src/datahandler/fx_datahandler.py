@@ -99,6 +99,7 @@ class FxDataHandler(abstract_datahandler.DataHandler):
         for ticker in self.tickers:
             market_data = self.latest_data[ticker][-self.K:]
             self.queue.append(event.MarketEvent(ticker, market_data))
+            print(f'got latest data for {ticker}')
         return self.latest_data
     
     def get_all_latest_data(self):
@@ -107,6 +108,7 @@ class FxDataHandler(abstract_datahandler.DataHandler):
             market_data = self.latest_data[ticker][-self.K:]
             mkt_events.append(event.MarketEvent(ticker, market_data))
         self.queue.append(event.MultipleMarketEvent(mkt_events))
+        print('got latest data')
         return self.latest_data
 
     def get_data(self):

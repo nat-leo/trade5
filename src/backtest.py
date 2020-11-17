@@ -20,16 +20,16 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
            "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
 queue = deque()
-bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2015, 1, 1), K=300)
+bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2019, 1, 1), K=100)
 #port = naive_portfolio.NaivePortfolio(queue, 1000)
 port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
-strat = linear_regression_strategy.NaiveLinearRegression(queue)
-#strat = dual_momentum_strategy.DualMomentum(queue)
+#strat = linear_regression_strategy.NaiveLinearRegression(queue)
+strat = dual_momentum_strategy.DualMomentum(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)
 
 while True:
-    bars.get_latest_data()
-    #bars.get_all_latest_data()
+    #bars.get_latest_data()
+    bars.get_all_latest_data()
     while True:
         if queue:
             if queue[0].get_type() == "MARKET":
