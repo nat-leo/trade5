@@ -20,7 +20,7 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
            "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
 queue = deque()
-bars = fx_datahandler.FxDataHandler(queue, conversions+tickers, "D", datetime.datetime(2019, 1, 1), K=100)
+bars = fx_datahandler.FxDataHandler(False, queue, conversions+tickers, "D", datetime.datetime(2014, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=100)
 #port = naive_portfolio.NaivePortfolio(queue, 1000)
 port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
 #strat = linear_regression_strategy.NaiveLinearRegression(queue)
@@ -58,16 +58,3 @@ while True:
         fig.show()
         break
 
-
-"""
-win ratio 0.4486115087317492
-            return
-count  3493.000000
-mean     -0.164358
-std       4.031105
-min     -23.799170
-25%      -1.906621
-50%       0.000000
-75%       1.662354
-max      24.099672
-"""

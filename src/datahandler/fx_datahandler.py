@@ -37,7 +37,7 @@ class FxDataHandler(abstract_datahandler.DataHandler):
     queue: a queue data structure
     data: dictionary of all data points needed in the form {currency: [data_points]}
     """
-    def __init__(self, queue, tickers, granularity, start_date, end_date=datetime.datetime.utcnow(), K=1):
+    def __init__(self, live, queue, tickers, granularity, start_date, end_date=datetime.datetime.utcnow(), K=1):
         self.queue = queue
         self.tickers = tickers
         self.granularity = granularity
@@ -46,10 +46,14 @@ class FxDataHandler(abstract_datahandler.DataHandler):
         self.K = K
         self.data = {}
         self.latest_data = {}
+        self.live = live
 
         # initialize data with api called data points, then pop first K points to latest data
         for ticker in self.tickers:
-            self.data[ticker] = deque(self._get_candles(ticker))
+            if self.live:
+                self.data[ticker] = deque(self._get_live_candles(ticker))
+            else:
+                self.data[ticker] = deque(self._get_candles(ticker))
             popped_points = []
             for i in range(self.K):
                 popped_points.append(self.data[ticker].popleft()) 
@@ -70,7 +74,35 @@ class FxDataHandler(abstract_datahandler.DataHandler):
             ('to', self.end_date.isoformat("T") + "Z"),
             ('granularity', str(self.granularity))
         )
+        response = requests.get(f"https://api-fxtrade.oanda.com/v3/instruments/{ticker}/candles", 
+                                        headers=LIVE_HEADER, params=data)
+        parsed_response = json.loads(response.text)
+        #print(parsed_response)
+        if response.status_code != 200: # throw error if GET doesn't go through
+            raise Exception(ValueError, f"status code is not 200, but {response.status_code} at {ticker}")
+        candles = []
+        for i in range(len(parsed_response['candles'])): # iterate through the number of candles we got.
+            next_candle = {'time': parsed_response['candles'][i]['time'],
+                           'volume': float(parsed_response['candles'][i]['volume']),
+                           'bid': [float(parsed_response['candles'][i]['bid']['o']), 
+                                float(parsed_response['candles'][i]['bid']['h']),
+                                float(parsed_response['candles'][i]['bid']['l']),
+                                float(parsed_response['candles'][i]['bid']['c'])],
+                           'ask': [float(parsed_response['candles'][i]['ask']['o']), 
+                                float(parsed_response['candles'][i]['ask']['h']),
+                                float(parsed_response['candles'][i]['ask']['l']),
+                                float(parsed_response['candles'][i]['ask']['c'])],}
+            candles += [next_candle]
+        #df = pd.DataFrame(candles)
+        return candles
 
+    def _get_live_candles(self, ticker):
+        """ api call to fill self.data with data points for each ticker. """
+        data = (
+            ('price', 'BA'),
+            ('count', str(self.K)),
+            ('granularity', str(self.granularity))
+        )
         response = requests.get(f"https://api-fxtrade.oanda.com/v3/instruments/{ticker}/candles", 
                                         headers=LIVE_HEADER, params=data)
         parsed_response = json.loads(response.text)

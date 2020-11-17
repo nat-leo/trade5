@@ -18,11 +18,11 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
             direction=q_event.get_direction(), 
             datetime= q_event.get_datetime(),
             ticker=q_event.get_ticker(), 
-            quantity=1000
+            quantity=40000
         ))
         print('portfolio created an order')
     
-    def create_close_order(self, ticker, direction, datetime, price, quantity=1000):
+    def create_close_order(self, ticker, direction, datetime, price, quantity=40000):
         """For takeprofit / stoploss caused OrderEvents. """
         self.events.append(event.OrderEvent(
             direction=direction, 
