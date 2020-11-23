@@ -53,11 +53,11 @@ class SignalEvent(Event):
     parameters:
     direction - '-1' or '1'
     """
-    def __init__(self, ticker, direction, datetime):
+    def __init__(self, ticker, direction, candle):
         self.type = 'SIGNAL'
         self.ticker = ticker
         self.direction = direction
-        self.datetime = datetime
+        self.candle = candle
     
     def get_type(self):
         return self.type
@@ -68,8 +68,8 @@ class SignalEvent(Event):
     def get_direction(self):
         return self.direction
     
-    def get_datetime(self):
-        return self.datetime
+    def get_candle(self):
+        return self.candle
 
 
 class OrderEvent(Event):
@@ -130,7 +130,7 @@ class FillEvent(Event):
     price - price at which the units were filled.
     commission - cost of getting a fill.
     """
-    def __init__(self, direction, ticker, quantity, price, pip_val, margin):
+    def __init__(self, direction, ticker, quantity, price, pip_val, margin, candle=None):
         self.type = 'FILL'
         self.ticker = ticker
         self.quantity = int(quantity)
@@ -138,6 +138,7 @@ class FillEvent(Event):
         self.direction = direction
         self.pip_val = pip_val
         self.margin = margin
+        self.candle = candle
     
     def get_type(self):
         return self.type
@@ -159,4 +160,7 @@ class FillEvent(Event):
     
     def get_margin(self):
         return self.margin
+    
+    def get_candle(self):
+        return self.candle
     

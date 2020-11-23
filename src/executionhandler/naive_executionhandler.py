@@ -58,9 +58,10 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             quantity=q_event.get_quantity(),
             price=price,
             pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity()),
-            margin=self.convert_to_usd(q_event.get_ticker(), q_event.get_quantity())
+            margin=self.convert_to_usd(q_event.get_ticker(), q_event.get_quantity()),
+            candle=q_event.get_datetime(),
         ))
-        print(f'execution filled order for {q_event.get_ticker()}')
+        #print(f'execution filled order for {q_event.get_ticker()}')
     
     def live_fill_order(self, q_event):
         self.order(q_event.get_direction(), q_event.get_ticker(), q_event.get_quantity())
@@ -73,7 +74,7 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             pip_val=self.set_pip_value(q_event.get_ticker(), price, q_event.get_quantity()),
             margin=self.convert_to_usd(q_event.get_ticker(), q_event.get_quantity())
         ))
-        print(f'execution filled order for {q_event.get_ticker()}')
+        #print(f'execution filled order for {q_event.get_ticker()}')
 
     def update_conversion(self, q_event):
         """updates conversion table with a MarketEvent."""
@@ -116,7 +117,7 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
         }
         response = requests.post(f"https://api-fxpractice.oanda.com/v3/accounts/{ACCOUNT}/orders", 
                                 headers=PRACTICE_HEADER, data=json.dumps(params))
-        print('order in ', response.status_code, direction*quantity)
+        #print('order in ', response.status_code, direction*quantity)
         return response.status_code
 
     def calculate_pip_val(self, ticker, rate, value):

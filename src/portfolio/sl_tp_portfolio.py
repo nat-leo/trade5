@@ -6,6 +6,7 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
     def __init__(self, events, equity):
         self.events = events
         self.holdings = {}
+        self.updated_list = []
         self.history = []
         self.equity = [equity]
     
@@ -16,13 +17,43 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
         """
         self.events.append(event.OrderEvent(
             direction=q_event.get_direction(), 
-            datetime= q_event.get_datetime(),
+            datetime= q_event.get_candle(),
             ticker=q_event.get_ticker(), 
-            quantity=40000
+            quantity=1000
         ))
-        print('portfolio created an order')
     
-    def create_close_order(self, ticker, direction, datetime, price, quantity=40000):
+    def create_single_order(self, q_event):
+        """
+        Get a SignalEvent and enter accordingly, but also get rid of the 
+        other holdings.
+        """
+        if isinstance(self.events[0], event.SignalEvent) and len(self.events) == 1:
+            self.updated_list.append({'ticker': q_event.get_ticker(), 'direction': q_event.get_direction(),
+                                 'candle': q_event.get_candle()})
+            for pair in self.updated_list:
+                if pair['ticker'] not in self.holdings:
+                    # enter pairs not currently holding:
+                    self.events.append(event.OrderEvent(
+                        direction=pair['direction'], 
+                        datetime=pair['candle'],
+                        ticker=pair['ticker'], 
+                        quantity=1000
+                    ))
+            for h in self.holdings:
+                if self.holdings[h]['ticker'] not in self.updated_list:
+                    # leave pairs that aren't in updated list
+                    self.events.append(event.OrderEvent(
+                            direction=1 if self.holdings[h]['direction']==-1 else -1, 
+                            datetime=self.holdings[h]['candle'],
+                            ticker=self.holdings[h]['ticker'],
+                            quantity=self.holdings[h]['quantity']
+                        ))
+            self.updated_list = []
+        else:
+            self.updated_list.append({'ticker': q_event.get_ticker(), 'direction': q_event.get_direction(),
+                                 'candle': q_event.get_candle()})
+
+    def create_close_order(self, ticker, direction, datetime, price, quantity=1000):
         """For takeprofit / stoploss caused OrderEvents. """
         self.events.append(event.OrderEvent(
             direction=direction, 
@@ -48,7 +79,6 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
             })
             self.equity.append(self.equity[-1] + self.calculate_return(holding['ticker'], holding['direction'], holding['price'], q_event.get_price(), holding['pip_value']))
             del self.holdings[q_event.get_ticker()]
-            print('portfolio added a trade entry')
         else: # add order to holdings
             self.holdings[q_event.get_ticker()] = {
                 'ticker': q_event.get_ticker(),
@@ -57,43 +87,67 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
                 'price': q_event.get_price(),
                 'pip_value': q_event.get_pip_val(),
                 'margin': q_event.get_margin(),
-                'stop_loss': self.set_stop_loss(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 200),
-                'take_profit': self.set_take_profit(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 500)
+                'candle': q_event.get_candle(),
+                'stop_loss': self.set_stop_loss(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 500),
+                'take_profit': self.set_take_profit(q_event.get_ticker(), q_event.get_direction(), q_event.get_price(), 400)
             }
-            print('portfolio updated holdings')
 
     def check_if_close_triggered(self, q_event):
         """Takes a MarketEvent and checks if the candle would have triggered one of the 
         holdings to close. """
-        tick = q_event.get_ticker()
-        _dir = self.holdings[tick]['direction']
-        date = q_event.get_data()[-1]['time']
-        bid = q_event.get_data()[-1]['bid']
-        ask = q_event.get_data()[-1]['ask']
+        if isinstance(q_event, event.MultipleMarketEvent):
+            for e in q_event.get_market_events():
+                if e.get_ticker() in self.holdings:
+                    tick = e.get_ticker()
+                    _dir = self.holdings[tick]['direction']
+                    date = e.get_data()[-1]
+                    bid = e.get_data()[-1]['bid']
+                    ask = e.get_data()[-1]['ask']
 
-        if _dir < 0: # if short (buy bid)
-            if bid[1] > self.holdings[tick]['stop_loss']:
-                # create an OrderEvent, pop holding out of holdings and into history
-                self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
-            elif bid[2] < self.holdings[tick]['take_profit']:
-                # create an OrderEvent, pop holding out of holdings and into history
-                self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
-        elif _dir > 0: # if long (sell ask)
-            if ask[2] < self.holdings[tick]['stop_loss']:
-                self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
-            elif ask[1] < self.holdings[tick]['take_profit']:
-                self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
+                    if _dir < 0: # if short (buy ask)
+                        if ask[1] >= self.holdings[tick]['stop_loss']:
+                            # create an OrderEvent, pop holding out of holdings and into history
+                            self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
+                        elif ask[2] <= self.holdings[tick]['take_profit']:
+                            # create an OrderEvent, pop holding out of holdings and into history
+                            self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
+                    elif _dir > 0: # if long (sell bid)
+                        if bid[2] <= self.holdings[tick]['stop_loss']:
+                            self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
+                        elif bid[1] >= self.holdings[tick]['take_profit']:
+                            self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
+
+        elif isinstance(q_event, event.MarketEvent):
+            if q_event.get_ticker() in self.holdings:
+                tick = q_event.get_ticker()
+                _dir = self.holdings[tick]['direction']
+                date = q_event.get_data()[-1]
+                bid = q_event.get_data()[-1]['bid']
+                ask = q_event.get_data()[-1]['ask']
+
+                if _dir < 0: # if short (buy bid)
+                    if bid[1] > self.holdings[tick]['stop_loss']:
+                        # create an OrderEvent, pop holding out of holdings and into history
+                        self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
+                    elif bid[2] < self.holdings[tick]['take_profit']:
+                        # create an OrderEvent, pop holding out of holdings and into history
+                        self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
+                elif _dir > 0: # if long (sell ask)
+                    if ask[2] < self.holdings[tick]['stop_loss']:
+                        self.create_close_order(tick, _dir, date, self.holdings[tick]['stop_loss'])
+                    elif ask[1] < self.holdings[tick]['take_profit']:
+                        self.create_close_order(tick, _dir, date, self.holdings[tick]['take_profit'])
 
     # utility functions
     def set_stop_loss(self, ticker, direction, price, pips):
         if ticker.startswith('JPY') or ticker.endswith('JPY'):
             if direction > 0:
-                sl = 0.01*pips - price
+                sl = price - 0.01*pips 
             elif direction < 0:
                 sl = 0.01*pips + price
         else:
             if direction > 0:
-                sl = 0.0001*pips - price
+                sl = price - 0.0001*pips
             elif direction < 0:
                 sl = 0.0001*pips + price
         return sl
