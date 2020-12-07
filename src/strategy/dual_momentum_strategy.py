@@ -5,6 +5,7 @@ from src.strategy import abstract_strategy
 class DualMomentum(abstract_strategy.Strategy):
     def __init__(self, events):
         self.events = events
+        self.timer = 0
 
     def get_signals(self, q_event):
         """
@@ -12,13 +13,13 @@ class DualMomentum(abstract_strategy.Strategy):
         short the fastest downgrowth. 
 
         example:
-        A:+5%, B:+6%, C:-7%, D: +2%,
+        A:+5%, B:+6%, C:-7%, D:+2%,
         Long only A, and Short only C
         """
         pair_performances = {}
         for mkt_event in q_event.get_market_events():
             pair_performances[mkt_event.get_ticker()] = self.calculate_percent_change(mkt_event.get_data()[-1]['bid'][3], 
-                                                                                      mkt_event.get_data()[0]['bid'][3])
+                                                                                    mkt_event.get_data()[0]['bid'][3])
         sorted_performances = [{'ticker': k, 'performance': v} for k, v in sorted(pair_performances.items(), key=lambda item: item[1])]
         
         for performance in sorted_performances[-3:]:

@@ -6,7 +6,7 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
     def __init__(self, events, equity):
         self.events = events
         self.holdings = {}
-        self.updated_list = []
+        self.updated_list = {}
         self.history = []
         self.equity = [equity]
     
@@ -27,20 +27,27 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
         Get a SignalEvent and enter accordingly, but also get rid of the 
         other holdings.
         """
+        # if we're at the last signal event, process it and update the update_list
         if isinstance(self.events[0], event.SignalEvent) and len(self.events) == 1:
-            self.updated_list.append({'ticker': q_event.get_ticker(), 'direction': q_event.get_direction(),
-                                 'candle': q_event.get_candle()})
+            self.updated_list[q_event.get_ticker()] = {
+                'ticker': q_event.get_ticker(), 
+                'direction': q_event.get_direction(), 
+                'candle': q_event.get_candle()
+            }
+            # for each pair in the updated list, check if it's already in holdings
+            # if the pair is in holidngs, do nothing.
+            # if the pair is not in holdings,
             for pair in self.updated_list:
-                if pair['ticker'] not in self.holdings:
+                if self.updated_list[pair]['ticker'] not in self.holdings:
                     # enter pairs not currently holding:
                     self.events.append(event.OrderEvent(
-                        direction=pair['direction'], 
-                        datetime=pair['candle'],
-                        ticker=pair['ticker'], 
+                        direction=self.updated_list[pair]['direction'], 
+                        datetime=self.updated_list[pair]['candle'],
+                        ticker=self.updated_list[pair]['ticker'], 
                         quantity=1000
                     ))
             for h in self.holdings:
-                if self.holdings[h]['ticker'] not in self.updated_list:
+                if self.holdings[h]['ticker'] not in self.updated_list: 
                     # leave pairs that aren't in updated list
                     self.events.append(event.OrderEvent(
                             direction=1 if self.holdings[h]['direction']==-1 else -1, 
@@ -48,10 +55,13 @@ class StopLossTakeProfit(naive_portfolio.NaivePortfolio):
                             ticker=self.holdings[h]['ticker'],
                             quantity=self.holdings[h]['quantity']
                         ))
-            self.updated_list = []
+            self.updated_list = {}
         else:
-            self.updated_list.append({'ticker': q_event.get_ticker(), 'direction': q_event.get_direction(),
-                                 'candle': q_event.get_candle()})
+            self.updated_list[q_event.get_ticker()] = {
+                'ticker': q_event.get_ticker(), 
+                'direction': q_event.get_direction(),
+                'candle': q_event.get_candle()
+            }
 
     def create_close_order(self, ticker, direction, datetime, price, quantity=1000):
         """For takeprofit / stoploss caused OrderEvents. """

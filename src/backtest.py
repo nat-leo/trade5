@@ -20,7 +20,7 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
            "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
 queue = deque()
-bars = fx_datahandler.FxDataHandler(False, queue, conversions+tickers, "D", datetime.datetime(2018, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=30)
+bars = fx_datahandler.FxDataHandler(False, queue, conversions[:5], "D", datetime.datetime(2018, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=30)
 #port = naive_portfolio.NaivePortfolio(queue, 1000)
 port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
 #port = single_hold_portfolio.SingleHoldPortfolio(queue, 1000)

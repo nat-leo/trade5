@@ -29,6 +29,7 @@ while True:
     if queue:
         if queue[0].get_type() == "MARKET":
             broker.update_conversion(queue[0])
+            port.check_if_close_triggered(queue[0])
             strat.get_signals(queue[0])
         if queue[0].get_type() == "SIGNAL":
             port.create_order(queue[0])
@@ -41,3 +42,6 @@ while True:
         break
 
 # started at 11:30am on Nov 17th
+
+# username: college board natliu333
+# case number: 08471326
