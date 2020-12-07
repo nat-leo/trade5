@@ -49,7 +49,7 @@ class Live(naive_executionhandler.NaiveExecutionHandler):
             "order": {
                 "units": str(direction*quantity),
                 "instrument": ticker,
-                "timeInForce": "IOC",
+                "timeInForce": "GTC",
                 "type": "MARKET",
                 "positionFill": "DEFAULT",
             }
