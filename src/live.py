@@ -26,28 +26,22 @@ port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
 strat = dual_momentum_strategy.DualMomentum(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)
 
-def run():
-    bars.get_all_latest_data()
-    while True:
-        if queue:
-            if queue[0].get_type() == "MARKET":
-                broker.update_conversion(queue[0])
-                port.check_if_close_triggered(queue[0])
-                strat.get_signals(queue[0])
-            if queue[0].get_type() == "SIGNAL":
-                port.create_order(queue[0])
-            if queue[0].get_type() == "ORDER":
-                broker.live_fill_order(queue[0])
-            if queue[0].get_type() == "FILL":
-                port.update(queue[0])
-            queue.popleft()
-        else:
-            break
-
-schedule.every(15).minutes.do(run)
-
+bars.get_all_latest_data()
 while True:
-    schedule.run_pending()
+    if queue:
+        if queue[0].get_type() == "MARKET":
+            broker.update_conversion(queue[0])
+            port.check_if_close_triggered(queue[0])
+            strat.get_signals(queue[0])
+        if queue[0].get_type() == "SIGNAL":
+            port.create_order(queue[0])
+        if queue[0].get_type() == "ORDER":
+            broker.live_fill_order(queue[0])
+        if queue[0].get_type() == "FILL":
+            port.update(queue[0])
+        queue.popleft()
+    else:
+        break
 
 # started at 11:30am on Nov 17th
 

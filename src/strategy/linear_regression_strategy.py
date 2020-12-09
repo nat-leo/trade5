@@ -7,6 +7,7 @@ import pandas as pd
 from src import event
 from src.strategy import abstract_strategy
 
+
 class NaiveLinearRegression(abstract_strategy.Strategy):
     def __init__(self, queue):
         self.queue = queue
