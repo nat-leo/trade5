@@ -79,16 +79,16 @@ class FxDataHandler(abstract_datahandler.DataHandler):
         parsed_response = json.loads(response.text)
         #print(parsed_response)
         if response.status_code != 200: # throw error if GET doesn't go through
-            raise Exception(ValueError, f"status code is not 200, but {response.status_code} at {ticker}")
+            raise Exception(ValueError, f"status code is not 200, but {response.status_code}, {response.reason} at {ticker}")
         candles = []
         for i in range(len(parsed_response['candles'])): # iterate through the number of candles we got.
-            next_candle = {'time': parsed_response['candles'][i]['time'],
-                           'volume': float(parsed_response['candles'][i]['volume']),
-                           'bid': [float(parsed_response['candles'][i]['bid']['o']), 
+            next_candle = {"time": parsed_response['candles'][i]['time'],
+                           "volume": float(parsed_response['candles'][i]['volume']),
+                           "bid": [float(parsed_response['candles'][i]['bid']['o']), 
                                 float(parsed_response['candles'][i]['bid']['h']),
                                 float(parsed_response['candles'][i]['bid']['l']),
                                 float(parsed_response['candles'][i]['bid']['c'])],
-                           'ask': [float(parsed_response['candles'][i]['ask']['o']), 
+                           "ask": [float(parsed_response['candles'][i]['ask']['o']), 
                                 float(parsed_response['candles'][i]['ask']['h']),
                                 float(parsed_response['candles'][i]['ask']['l']),
                                 float(parsed_response['candles'][i]['ask']['c'])],}
@@ -111,13 +111,13 @@ class FxDataHandler(abstract_datahandler.DataHandler):
             raise Exception(ValueError, f"status code is not 200, but {response.status_code} at {ticker}")
         candles = []
         for i in range(len(parsed_response['candles'])): # iterate through the number of candles we got.
-            next_candle = {'time': parsed_response['candles'][i]['time'],
-                           'volume': float(parsed_response['candles'][i]['volume']),
-                           'bid': [float(parsed_response['candles'][i]['bid']['o']), 
+            next_candle = {"time": parsed_response['candles'][i]['time'],
+                           "volume": float(parsed_response['candles'][i]['volume']),
+                           "bid": [float(parsed_response['candles'][i]['bid']['o']), 
                                 float(parsed_response['candles'][i]['bid']['h']),
                                 float(parsed_response['candles'][i]['bid']['l']),
                                 float(parsed_response['candles'][i]['bid']['c'])],
-                           'ask': [float(parsed_response['candles'][i]['ask']['o']), 
+                           "ask": [float(parsed_response['candles'][i]['ask']['o']), 
                                 float(parsed_response['candles'][i]['ask']['h']),
                                 float(parsed_response['candles'][i]['ask']['l']),
                                 float(parsed_response['candles'][i]['ask']['c'])],}

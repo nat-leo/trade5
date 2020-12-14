@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 import pandas as pd 
 
 from src.datahandler import fx_datahandler
-from src.portfolio import sl_tp_portfolio
+from src.portfolio import sl_tp_portfolio, csv_portfolio
 from src.strategy import dual_momentum_strategy
 from src.executionhandler import naive_executionhandler
 
@@ -21,11 +21,9 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
            "GBP_AUD", "GBP_CAD", "GBP_CHF", "GBP_NZD", "GBP_USD", "NZD_CAD"]
 
 queue = deque()
-bars = fx_datahandler.FxDataHandler(False, queue, conversions[:5], "D", datetime.datetime(2007, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=30)
-#port = naive_portfolio.NaivePortfolio(queue, 1000)
-port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
-#port = single_hold_portfolio.SingleHoldPortfolio(queue, 1000)
-#strat = linear_regression_strategy.NaiveLinearRegression(queue)
+bars = fx_datahandler.FxDataHandler(False, queue, conversions[:5], "D", datetime.datetime(2018, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=30)
+#port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
+port = csv_portfolio.CsvPortfolio(queue, 1000)
 strat = dual_momentum_strategy.DualMomentum(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)
 
@@ -62,4 +60,3 @@ while True:
         fig.add_trace(go.Histogram(x=x), row=1, col=2)
         fig.show()
         break
-

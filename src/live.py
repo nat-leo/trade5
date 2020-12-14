@@ -4,7 +4,7 @@ import datetime
 import schedule
 
 from src.datahandler import fx_datahandler
-from src.portfolio import naive_portfolio, sl_tp_portfolio
+from src.portfolio import sl_tp_portfolio, csv_portfolio
 from src.strategy import linear_regression_strategy, dual_momentum_strategy
 from src.executionhandler import naive_executionhandler, live_executionhandler
 
@@ -20,8 +20,8 @@ tickers = ["AUD_CAD", "AUD_CHF", "AUD_NZD", "CAD_CHF",
 
 queue = deque()
 bars = fx_datahandler.FxDataHandler(True, queue, conversions+tickers, "M15", datetime.datetime(2014, 10, 17), end_date=datetime.datetime(2020, 11, 17), K=100)
-#port = naive_portfolio.NaivePortfolio(queue, 1000)
-port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
+#port = sl_tp_portfolio.StopLossTakeProfit(queue, 1000)
+port = csv_portfolio.CsvPortfolio(queue, 1000)
 #strat = linear_regression_strategy.NaiveLinearRegression(queue)
 strat = dual_momentum_strategy.DualMomentum(queue)
 broker = naive_executionhandler.NaiveExecutionHandler(queue)

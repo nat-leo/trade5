@@ -1,6 +1,7 @@
 from src.portfolio import naive_portfolio
 from src import event
 
+
 class SingleHoldPortfolio(naive_portfolio.NaivePortfolio):
     """" Naive Portfolio with a Stop Loss and Take Profit."""
     def __init__(self, events, equity):

@@ -1,4 +1,5 @@
 import json
+import csv
 
 from decouple import config
 import requests
@@ -49,9 +50,15 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
             "USD_ZAR": {},
             "USD_TRY": {},
         }
+        self.prices = {}
 
     def fill_order(self, q_event):
-        price = q_event.get_datetime()['bid'][3] if q_event.get_direction() < 0 else q_event.get_datetime()['ask'][3]
+        price = self.prices[q_event.get_ticker()]['bid'][3] if q_event.get_direction() < 0 else self.prices[q_event.get_ticker()]['ask'][3]
+        with open("example.csv", 'a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(['FILL',
+                                        q_event.get_direction(), 
+                                        q_event.get_ticker()])
         self.events.append(event.FillEvent(
             direction=q_event.get_direction(), 
             ticker=q_event.get_ticker(), 
@@ -87,6 +94,7 @@ class NaiveExecutionHandler(abstract_executionhandler.ExecutionHandler):
                 if mkt_event.get_ticker() in self.conversions:
                     midpoint = (mkt_event.get_data()[-1]['bid'][3] + mkt_event.get_data()[-1]['ask'][3]) / 2
                     self.conversions[mkt_event.get_ticker()] = midpoint
+                self.prices[mkt_event.get_ticker()] = mkt_event.get_data()[-1]
 
     def set_pip_value(self, ticker, rate, value):
         """called on an OrderEvent"""

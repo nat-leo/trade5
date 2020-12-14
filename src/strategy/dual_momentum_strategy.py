@@ -1,3 +1,5 @@
+import csv
+
 from src import event
 from src.strategy import abstract_strategy
 
@@ -26,6 +28,12 @@ class DualMomentum(abstract_strategy.Strategy):
             for mkt_event in q_event.get_market_events():
                 if mkt_event.get_ticker() == performance['ticker']:
                     data = mkt_event.get_data()[-1]
+            with open("example.csv", 'a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(['SIGNAL',
+                                        1, 
+                                        performance['ticker'],
+                                        data['time']])
             self.events.append(event.SignalEvent(performance['ticker'], 1, data))
         return pair_performances
 
