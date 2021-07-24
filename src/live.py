@@ -42,8 +42,3 @@ while True:
         queue.popleft()
     else:
         break
-
-# started at 11:30am on Nov 17th
-
-# username: college board natliu333
-# case number: 08471326
